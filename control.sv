@@ -1,20 +1,24 @@
 
-module control(opcode,Branch,ALUop,Reg_Write,Mem_Read,Mem_Write,ALU_src_A,ALU_src_B,PC_Write,clk,reset,WB_Mux_sel,done,Debug,ebreak);
+module control(opcode,ALUop,Reg_Write,Mem_Read,Mem_Write,ALU_src_A,ALU_src_B,PC_Write,clk,reset,WB_Mux_sel,done,Debug,ebreak);
 input 	clk,reset;
 input  [6:0]opcode;
 input  [11:0]ebreak;
 output  reg [1:0] ALUop;
 output  reg [1:0] WB_Mux_sel,ALU_src_B;
-output  reg Reg_Write,Mem_Read,Mem_Write,ALU_src_A,PC_Write,Branch,done,Debug;
+output  reg Reg_Write,Mem_Read,Mem_Write,ALU_src_A,PC_Write,done,Debug;
 //logic [3:0] state, nextstate;
 
 /*
-		Reg_Write 	<=;
-		Mem_Read		<=;
-		Mem_Write	<=;
-		ALU_src		<=;
-		ALUop			<=;
-		Branch		<=;
+			Debug			<=  'bz;
+			done 			<=  'bz;
+			Reg_Write 	<=  'bz;
+			Mem_Read		<=  'bz;
+			Mem_Write	<=  'bz;
+			ALU_src_A	<=  'bz;
+			ALU_src_B	<=  'bzz;
+			ALUop			<=  'bzz;
+			WB_Mux_sel  <=  'bzz;
+			PC_Write		<=  'bz;
 */
 
 enum int unsigned 	{state0=0, // IDLE and update PC 
@@ -65,7 +69,6 @@ begin
 			ALU_src_A	<=  'b0;// select current PC value stored in PC_register
 			ALU_src_B	<=  'b01;// select " 'h4 " to add to next PC
 			ALUop			<=  'b10;//Addition
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b1;
 			end
@@ -79,7 +82,6 @@ begin
 			ALU_src_A	<=  'b0;// select current PC value stored in PC_register
 			ALU_src_B	<=  'b01;
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;			
 			PC_Write		<=  'b0;
 			case(opcode)
@@ -133,7 +135,6 @@ begin
 			ALU_src_A	<=  'b1;
 			ALU_src_B	<=  'b10;
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b0;
 				case(opcode)
@@ -159,7 +160,6 @@ begin
 			ALU_src_A	<=  'b1;
 			ALU_src_B	<=  'b10;
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b0;
 			end
@@ -174,7 +174,6 @@ begin
 			ALU_src_A	<=  'b1;
 			ALU_src_B	<=  'b10;
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b10;//choose the read data to load data into destination register
 			PC_Write		<=  'b0;
 			end
@@ -189,7 +188,6 @@ begin
 			ALU_src_A	<=  'b1;
 			ALU_src_B	<=  'b10;
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b0;
 			end
@@ -209,10 +207,8 @@ begin
 			ALU_src_B	<=  'b10;end
 			//==================
 			ALUop			<=  'b00;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b0;
-
 			end
 			state7://write back to register
 			begin
@@ -229,8 +225,7 @@ begin
 			else 					  begin
 			ALU_src_B	<=  'b10;end
 			//==================
-			ALUop			<=  'b10;
-			Branch		<=  'b0;
+			ALUop			<=  'bzz;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b0;
 			end
@@ -244,8 +239,7 @@ begin
 			Mem_Write	<=  'b0;
 			ALU_src_A	<=  'b1;// choose RS1
 			ALU_src_B	<=  'b00;// choose RS2 
-			ALUop			<=  'b10;// because ALU design have it compare flags so whatever the output got still the comparison got recorded 
-			Branch		<=  'b1;
+			ALUop			<=  'bzz;// because ALU design have it compare flags so whatever the output got still the comparison got recorded 
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b0;
 			end
@@ -260,7 +254,6 @@ begin
 			ALU_src_A	<=  'b0;// choose PC
 			ALU_src_B	<=  'b01;// choose +4
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b0;
 				case(opcode)
@@ -286,7 +279,6 @@ begin
 			ALU_src_A	<=  'b0;// choose PC
 			ALU_src_B	<=  'b10;// choose imm
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b1;
 			end		
@@ -301,7 +293,6 @@ begin
 			ALU_src_A	<=  'b1;// choose RS1
 			ALU_src_B	<=  'b10;// choose imm
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b1;
 			end			
@@ -314,9 +305,8 @@ begin
 			Mem_Read		<=  'b0;
 			Mem_Write	<=  'b0;
 			ALU_src_A	<=  'b0;// choose PC
-			ALU_src_B	<=  'b11;// choose imm
+			ALU_src_B	<=  'b11;// choose imm_out
 			ALUop			<=  'b10;
-			Branch		<=  'b1;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b1;
 			end	
@@ -331,7 +321,6 @@ begin
 			ALU_src_A	<=  'b0;
 			ALU_src_B	<=  'b00;
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b0;
 			end		
@@ -347,7 +336,6 @@ begin
 			ALU_src_A	<=  'b0;
 			ALU_src_B	<=  'b00;
 			ALUop			<=  'b10;
-			Branch		<=  'b0;
 			WB_Mux_sel  <=  'b00;
 			PC_Write		<=  'b0;
 			end

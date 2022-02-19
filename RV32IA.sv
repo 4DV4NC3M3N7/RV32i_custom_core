@@ -8,9 +8,9 @@ logic [31:0] PC;
 logic [3:0] operation;//operation({func_7 merge with forced signed "1", funct_3[2:0]})
 logic [1:0] ALUop,WB_Mux_sel,ALU_SRC_B;//ALUop( to use as the indicator for the ALU_control to decide what would happen to the ALU outside the ALU instructions)
 logic [6:0] opcode;//opcode(operation code field)
-logic [31:0]ALU_out,
+logic [31:0]ALU_out,ALU_out_Latched,ALU_in_rs1_Latched,ALU_in_rs2_Latched,
 				imm,
-				imm_out,
+				imm_out,imm_out_latched,
 				MUX_OUT,
 				Write_Data_mem,
 				Read_Data_mem,
@@ -31,10 +31,9 @@ logic clr,
 		Mem_Read,
 		ALU_SRC_A,
 		PC_Write,
-		Branch,
 		more,even,less,
 		done,
-		Debug,clock_ctrl,clr_ctrl,Debug_signal,clk;
+		Debug,Debug_signal,clk;
 
 ///* test 
 
@@ -45,7 +44,9 @@ logic clr,
 								.ALUop(ALUop),
 								.operation(operation)
 								);		
+	
 
+	
 	ALU ALU(
 				.result(ALU_out),
 				.operation(operation),
@@ -56,18 +57,26 @@ logic clr,
 				.Less(less)
 				);				
 
+	Reg_32bit ALU_OUT_register(
+									.enable(1'b1),
+									.choose(1'b1),
+									.clr(clr),
+									.clk(clk),
+									.Data_in(ALU_out),
+									.Data_out(ALU_out_Latched)// (current PC) 
+									);	
 	MUX4 ALU_src_B_MUX(
 						.sel(ALU_SRC_B),
-						.in1(ALU_in_rs2),
+						.in1(ALU_in_rs2_Latched),
 						.in2(32'h4),
 						.in3(imm),
-						.in4(imm_out),
+						.in4(imm_out_latched),
 						.MUX_OUT(ALU_SRC_B_MUX)
 						);
 	MUX2 ALU_src_A_MUX(
 							.sel(ALU_SRC_A),
 							.in1(PC),
-							.in2(ALU_in_rs1),
+							.in2(ALU_in_rs1_Latched),
 							.out(ALU_SRC_A_MUX)
 						);			
 						
@@ -83,7 +92,7 @@ logic clr,
 	
 	assign PC_out = PC;
 									
-	Initializer Init(.clk(clk),.enable(enable),.Debug(Debug),.clr(clr),.reset(reset));//Initializing the cpu, or halting/return the cpu to debug mode.
+	Initializer Init(.clk(clk),.enable(enable),.Debug(Debug_signal),.clr(clr),.reset(reset));//Initializing the cpu, or halting/return the cpu to debug mode.
 									
 	Register_file Reg_file(
 									.RS1(RS1),
@@ -95,9 +104,26 @@ logic clr,
 									.RD1(ALU_in_rs1),
 									.RD2(ALU_in_rs2)
 									);		
-							
+
+	Reg_32bit ALU_in_rs1_register(
+									.enable(1'b1),
+									.choose(1'b1),
+									.clr(clr),
+									.clk(clk),
+									.Data_in(ALU_in_rs1),
+									.Data_out(ALU_in_rs1_Latched)// (current PC) 
+									);
+	Reg_32bit ALU_in_rs2_register(
+									.enable(1'b1),
+									.choose(1'b1),
+									.clr(clr),
+									.clk(clk),
+									.Data_in(ALU_in_rs2),
+									.Data_out(ALU_in_rs2_Latched)// (current PC) 
+									);			
+	
 	MUX4  			WBMUX(	.sel(WB_Mux_sel),// write back to register
-									.in1(ALU_out),
+									.in1(ALU_out_Latched),
 									.in2(imm),
 									.in3(complete_Read_Data_mem),
 									.in4(),
@@ -111,7 +137,6 @@ logic clr,
 	
 	branch Br(
 					.funct_3(inst[14:12]),
-					.branch(Branch),
 					.more(more),
 					.even(even),
 					.less(less),
@@ -119,6 +144,14 @@ logic clr,
 					.imm_out(imm_out)
 				);
 
+	Reg_32bit Branch_imm(
+									.enable(1'b1),
+									.choose(1'b1),
+									.clr(clr),
+									.clk(clk),
+									.Data_in(imm_out),
+									.Data_out(imm_out_latched)// (current PC) 
+									);
 
 	instruction_decoder inst_decode(
 												.inst(inst),
@@ -134,7 +167,6 @@ logic clr,
 						.opcode(inst[6:0]),
 						.ebreak(inst[31:20]),
 						.WB_Mux_sel(WB_Mux_sel),
-						.Branch(Branch),
 						.ALUop(ALUop),
 						.ALU_src_A(ALU_SRC_A),
 						.ALU_src_B(ALU_SRC_B),
@@ -162,7 +194,7 @@ logic clr,
 
 	Data_Memory DMEM(
 							.Write_Data(Write_Data_mem),
-							.Address(ALU_out),
+							.Address(ALU_out_Latched),
 							.Mem_Read(Mem_Read),
 							.Mem_Write(Mem_Write),
 							.Read_Data(Read_Data_mem)

@@ -1,9 +1,9 @@
-module branch(funct_3,branch,more,even,less,imm_in,imm_out);
+module branch(funct_3,more,even,less,imm_in,imm_out);
 input [2:0] funct_3;
 input [31:0] imm_in;
 output[31:0] imm_out;
-input branch,more,even,less;
-logic branch_true;
+input more,even,less;
+logic branch_true,branch;
 logic [31:0] temp;
 
 	check_valid check(
@@ -14,7 +14,7 @@ logic [31:0] temp;
 					.less(less),
 					.branch_true(branch_true)
 					);
-	
+	assign branch = 1'b1;
 	assign imm_out = branch_true?imm_in:32'h4;
 	
 endmodule 
