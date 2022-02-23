@@ -14,4 +14,9 @@ Custom RV32i core that cover 39 instructions except "ecall" and "fence"
      
     ![image](https://user-images.githubusercontent.com/39961019/154810623-058f4445-1ee3-4727-8f96-65bb142e1590.png)
     ![image](https://user-images.githubusercontent.com/39961019/154810643-5c97de59-d1bc-4d03-bb73-3d24f54b40ef.png)
+    
+- Pulled out DMEM inside the RV32ia core to the main connection prepare for multicore development.
+    
+    ![image](https://user-images.githubusercontent.com/39961019/155264078-6ba73eea-057e-4faf-9f1a-0e7400f9d40d.png)
+
 
