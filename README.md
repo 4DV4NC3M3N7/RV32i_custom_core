@@ -1,4 +1,4 @@
-# RV32i_custom_core
+# RV32i_Multicycle_custom_core
 Custom RV32i core that cover 39 instructions except "ecall" and "fence"
 
 - Loading instruction( assembly form) into the imem is more easier with my "RV32i emulation"(one of my project[https://github.com/4DV4NC3M3N7/RV32i_emulation.git]) repos that have a program to turn asm code into psuedo hex code(in .bin file is representation as hex number).
