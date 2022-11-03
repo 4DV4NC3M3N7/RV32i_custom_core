@@ -79,7 +79,7 @@ assign out[3] = ALUop[0]?1'b1:(funct_7&(~ALUop[1]));
 						out[2:0] <= 3'b000;
 						out[3]   <= 1'b0;
 					end	
-				default:					begin
+				2'b11:					begin
 						out[2:0] <= 3'b000;
 						out[3]   <= 1'b0;
 					end	
